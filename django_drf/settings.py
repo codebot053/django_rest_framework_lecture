@@ -69,7 +69,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'test_app_0.apps.TestApp0Config',
     'user',
-    'blog',
 
 ]
 
@@ -117,8 +116,6 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
-
-AUTH_USER_MODEL = 'user.User' # app.table 형태
 
 AUTH_PASSWORD_VALIDATORS = [
     {
