@@ -14,10 +14,10 @@ class UserManager(BaseUserManager):
         return user
     
     # python manage.py createsuperuser 사용 시 해당 함수가 사용됨
-    def create_superuser(self, username, password):
+    def create_superuser(self, username, password, ):
         user = self.create_user(
             username=username,
-            password=password
+            password=password,
         )
         user.is_admin = True
         user.save(using=self._db)
@@ -41,6 +41,7 @@ class User(AbstractBaseUser):
     USERNAME_FIELD = 'username'
 
     # user를 생성할 때 입력받은 필드 지정
+    # 지금은 사용하지 않고 serializer 에서 처리 할 예정.
     REQUIRED_FIELDS = []
     
     objects = UserManager() # custom user 생성 시 필요

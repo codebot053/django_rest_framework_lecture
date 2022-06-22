@@ -6,16 +6,34 @@ from rest_framework.response import Response
 from rest_framework import permissions, status
 
 # # Create your views here.
-
+ 
 
 class UserApiView(APIView):
     # 로그인
     permission_classes = [permissions.AllowAny]
+    
+    def get(self,request):
+        # 정참조ex
+        '''
+        user_profile = UserProfile.objects.get(id=1)
+        user_profile.user
+        user_profile.hobby
+        '''
+        # 역참조ex
+        '''
+        hobby = Hobby.objects.get(id=1)
+        hobby.userprofile_set
+        '''
+
+        return Response({"message": "get success!!"})
+
     def post(self, request):
         username = request.data.get('username', '')
         password = request.data.get('password', '')
 
         user = authenticate(request, username=username, password=password)
+        
+        
         if not user:
             return Response({"error": "존재하지 않는 계정이거나 패스워드가 일치하지 않습니다."}, status=status.HTTP_401_UNAUTHORIZED)
 
