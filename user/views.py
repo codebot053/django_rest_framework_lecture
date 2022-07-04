@@ -13,8 +13,7 @@ from django.conf import settings
 from user.serializers import UserSerializer
 # user models
 from user.models import User, UserProfile, Hobby
-# # Create your views here.
- 
+# # Create your views here. 
 
 class UserApiView(APIView):
     # 로그인
