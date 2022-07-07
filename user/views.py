@@ -38,7 +38,12 @@ class UserApiView(APIView):
         # UserSerializer() 안에 queryset 이나 object를 넣어주면 된다.
         # 'User.objects.all()' 과 같이 queryset 으로 불러올경우 'many=True'를 뒤에 써야한다.
         # UserSerializer() 뒤에 .data 를 적어야 JSON 형태의 데이터가 불러와진다.
-        return Response(UserSerializer(User.objects.all(), many=True).data, status=status.HTTP_200_OK)
+        # 아래 코드는 queryset 일때!
+        #return Response(UserSerializer(User.objects.all(), many=True).data, status=status.HTTP_200_OK)
+        # 아래 코드는 단일 object 일때! (단일 object 는 'many=True'를 사용하지 않는다.)
+        #return Response(UserSerializer(User.objects.all().first()).data, status=status.HTTP_200_OK)
+        # 만약 랜덤으로 user를 뽑을 경우에는 아래와 같이 한다.
+        return Response(UserSerializer(User.objects.all().order_by('?').first()).data, status=status.HTTP_200_OK)
         #return Response({"message": "get success!!"})
 
     def post(self, request):
