@@ -34,7 +34,7 @@ class UserProfileInline(admin.StackedInline):
         if db_field.name == 'hobby':
             # id__lte = 7 ==> less then or equal,7보다작거나 같은경우, 2이하
             kwargs['queryset'] = UserHobbyList.objects.filter(id__lte=2)
-
+        # super() 를 쓰지않으면 부모class의 상속내용을 쓰는게 아니라 덮어쓰기 overwriting이 된다.
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     '''
 # admin 심화 설정!
