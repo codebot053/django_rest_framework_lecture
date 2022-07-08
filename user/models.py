@@ -77,8 +77,8 @@ class UserProfile(models.Model):
 
 class Hobby(models.Model):
     name = models.CharField("취미", max_length=50)
-    #def __str__(self):
-    #    return self.name
+    def __str__(self):
+       return self.name
 
 class UseStack(models.Model):
     name = models.CharField("사용 기술", max_length=50)
