@@ -4,8 +4,8 @@ from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
 from user.models import Hobby as HobbyModel
 from user.models import UseStack as UseStackModel
-
-
+from blog.models import Article as ArticleModel
+from blog.models import Category as CategoryModel
 # hobby serializer
 class HobbySerializer(serializers.ModelSerializer):
     # 역참조, 나와 같은 hobby를 공유하는 사람들을 불러온다.
@@ -75,3 +75,16 @@ class UserSerializer(serializers.ModelSerializer):
             'password':{'write_only':True}, # write_only : 데이터를 쓰거나 생성하거나 검증할때만 사용한다.
         }
 
+class CategorySerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = CategoryModel
+        fields = ['name']
+
+
+
+class MyArticleSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(many=True)
+    class Meta:
+        model = ArticleModel
+        fields = ['name', 'category', 'content']
