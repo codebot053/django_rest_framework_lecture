@@ -51,6 +51,7 @@ class UserApiView(APIView):
         #return Response(UserSerializer(User.objects.all().order_by('?').first()).data, status=status.HTTP_200_OK)
         #return Response({"message": "get success!!"})
 
+    # 유저 정보와 작성글 현황을 동시에 조회
     def post(self, request):
         username = request.data.get('username', '')
         password = request.data.get('password', '')
@@ -62,9 +63,13 @@ class UserApiView(APIView):
             return Response({"error": "존재하지 않는 계정이거나 패스워드가 일치하지 않습니다."}, status=status.HTTP_401_UNAUTHORIZED)
 
         login(request, user)
-        #현재 유저를 선언
-        current_user = request.user
-        #print(current_user.id)
-        #현재 유저가 쓴 글의 목록을 return
-        return Response(MyArticleSerializer(Article.objects.filter(user_id=current_user.id), many=True).data,status=status.HTTP_200_OK)
+        #현재 유저의 id 값을 받는다.
+        current_user_id = request.user.id
         
+        current_user_info = UserSerializer(User.objects.get(id=current_user_id)).data
+        current_user_articles = MyArticleSerializer(Article.objects.filter(user_id=current_user_id), many=True).data
+        current_user_articles_count = len(current_user_articles)
+        #현재 유저 정보, 작성글 수, 작성글을 return
+        return Response({'유저 정보' : current_user_info,
+                        '작성글 수' : current_user_articles_count,
+                        '유저 작성글': current_user_articles},status=status.HTTP_200_OK)
