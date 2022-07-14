@@ -82,6 +82,7 @@ class UserSerializer(serializers.ModelSerializer):
         # hobby 등록
         user_profile.hobby.add(*get_hobbys)
         user_profile.save()
+        return user
     class Meta:
         model = UserModel
         # password 가 추가되어야 하는 이유는 create, update 시 validation 을 제공하기 위함이다. 
