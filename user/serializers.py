@@ -1,4 +1,7 @@
 from rest_framework import serializers
+# password 해싱 모듈
+from django.contrib.auth.hashers import make_password
+
 
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
@@ -8,6 +11,8 @@ from blog.models import Article as ArticleModel
 from blog.models import Category as CategoryModel
 # hobby serializer
 
+
+
 class HobbySerializer(serializers.ModelSerializer):
     # 역참조, 나와 같은 hobby를 공유하는 사람들을 불러온다.
     '''
@@ -15,37 +20,38 @@ class HobbySerializer(serializers.ModelSerializer):
 
     def get_same_hobby_person_field(self, obj):
         # obj는 조회된 유저의 취미 object를 받는다.
-        print(f"{obj} / {type(obj)}")
+        # print(f"{obj} / {type(obj)}")
         # 음악 / <class 'user.models.Hobby'> 
         # string 이 아닌 hobby라는 모델의 object 인것을 확인할 수 있다.
         # 모델 class 안에 있는 값이다. models.py에서 
         # class Hobby(models.Model): 에서
         # __str__(self) 를 비활성 하면 hobby object(num)이 출력되는것을 확인할 수 있다.
-        return "good_serializer"
+        # return "good_serializer"
     '''
-    same_hobby_users = serializers.SerializerMethodField()
+    # same_hobby_users = serializers.SerializerMethodField()
     
-    def get_same_hobby_users(self, obj):
-        same_user_list = []
-        #할수 있는 것들 표시 'dir'
-        # print(dir(obj))
-        # print(obj.userprofile_set.all())
-        for user_profile in obj.userprofile_set.all():
-            # 취미는 유저프로필의 foreign key 이므로 프로필에 유저에 풀네임으로 참조
-            same_user_list.append(user_profile.user.fullname)
-        return same_user_list
-        '''
-        "same_hobby_users": [
-                    "지훈박",
-                    "qwer",
-                    "testuser0",
-                    "admin"
-                ]
-        위와 같은 형태로 postman 에서 확인할수 있다.
-        '''
+    # def get_same_hobby_users(self, obj):
+    #     same_user_list = []
+    #     #할수 있는 것들 표시 'dir'
+    #     # print(dir(obj))
+    #     # print(obj.userprofile_set.all())
+    #     for user_profile in obj.userprofile_set.all():
+    #         # 취미는 유저프로필의 foreign key 이므로 프로필에 유저에 풀네임으로 참조
+    #         same_user_list.append(user_profile.user.fullname)
+    #     return same_user_list
+    #     '''
+    #     "same_hobby_users": [
+    #                 "지훈박",
+    #                 "qwer",
+    #                 "testuser0",
+    #                 "admin"
+    #             ]
+    #     위와 같은 형태로 postman 에서 확인할수 있다.
+    #     '''
     class Meta:
         model = HobbyModel
-        fields = ['name','same_hobby_users']
+        # fields = ['name','same_hobby_users']
+        fields = ['name']
 
 # userprofile serializer
 class UserProfileSerializer(serializers.ModelSerializer):
@@ -71,7 +77,8 @@ class UserSerializer(serializers.ModelSerializer):
         # object를 생성할때 다른 데이터가 입력되는 것을 방지하기 위해 미리 pop 해준다.
         user_profile = validated_data.pop('userprofile')
         get_hobbys = user_profile.pop("get_hobbys", [])
-
+        # 비밀번호 암호화
+        validated_data["password"] = make_password(validated_data['password'])
         # User object 생성
         user = UserModel(**validated_data)
         user.save()

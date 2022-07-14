@@ -56,7 +56,7 @@ class UserAdmin(admin.ModelAdmin):
 
     # 상세 페이지에서 필드를 종류별로 분류할떄 좋다.
     fieldsets = (
-        ("info", {'fields': ('username', 'fullname', 'join_date')}),
+        ("info", {'fields': ('username', 'fullname', 'join_date','password')}),
         ('permissions', {'fields': ('is_admin', 'is_active', )}),
     )
     # 위에 생성한 UserProfileInline을 이제 유저 상세에서 볼수 있도록 등록.
