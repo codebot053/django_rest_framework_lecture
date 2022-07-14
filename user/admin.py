@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from user.models import User
 from user.models import UserProfile
 from user.models import Hobby as UserHobbyList
-from user.models import UseStack as UserUseStackList
+# from user.models import UseStack as UserUseStackList
 # Register your models here.
 
 # Unregister Group
@@ -67,4 +67,4 @@ admin.site.register(User, UserAdmin)
 # UserProfile을 User 테이블 상세에서 StackInline처리 하였기에 잠시 주석처리.
 #admin.site.register(UserProfile)
 admin.site.register(UserHobbyList)
-admin.site.register(UserUseStackList)
+# admin.site.register(UserUseStackList)

@@ -65,7 +65,7 @@ class UserApiView(APIView):
         login(request, user)
         #현재 유저의 id 값을 받는다.
         current_user_id = request.user.id
-        
+
         current_user_info = UserSerializer(User.objects.get(id=current_user_id)).data
         current_user_articles = MyArticleSerializer(Article.objects.filter(user_id=current_user_id), many=True).data
         current_user_articles_count = len(current_user_articles)
@@ -73,3 +73,19 @@ class UserApiView(APIView):
         return Response({'유저 정보' : current_user_info,
                         '작성글 수' : current_user_articles_count,
                         '유저 작성글': current_user_articles},status=status.HTTP_200_OK)
+
+
+class UserSignupApiView(APIView):
+
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        
+        user_serializer = UserSerializer(data=request.data)
+
+        if user_serializer.is_valid():
+            user_serializer.create()
+            return Response(user_serializer.data,status=status.HTTP_200_OK)
+        
+
+        return Response(user_serializer.errors,status=status.HTTP_400_BAD_REQUEST)

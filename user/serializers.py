@@ -3,10 +3,11 @@ from rest_framework import serializers
 from user.models import User as UserModel
 from user.models import UserProfile as UserProfileModel
 from user.models import Hobby as HobbyModel
-from user.models import UseStack as UseStackModel
+#from user.models import UseStack as UseStackModel
 from blog.models import Article as ArticleModel
 from blog.models import Category as CategoryModel
 # hobby serializer
+
 class HobbySerializer(serializers.ModelSerializer):
     # 역참조, 나와 같은 hobby를 공유하는 사람들을 불러온다.
     '''
@@ -51,17 +52,36 @@ class UserProfileSerializer(serializers.ModelSerializer):
     # hobby serializer 등록
     # 만약 불러오는게 many to many 관계라면 'many=True'를 준다.
     # many to many 필드는 queryset 과 유사함.  그냥 불러오면 null값 return
-    hobby = HobbySerializer(many=True)
+    # hobby = HobbySerializer(many=True)
+    hobby = HobbySerializer(many=True, required=False, read_only=True)
+    get_hobbys = serializers.ListField(required=False)
     class Meta:
         model = UserProfileModel
-        fields = ['introduction', 'age', 'birthday','hobby']    
+        fields = ['introduction', 'age', 'birthday','hobby','get_hobbys']    
 
 class UserSerializer(serializers.ModelSerializer):
+
     # 위에 등록된 userprofile serializer를 가져온다.
     # 아래 코드를 지정하지 않으면 프로필 id가 리턴된다.
     # fields 에 마저 적어주기!
     userprofile = UserProfileSerializer()
 
+    # user와 foreign key 관계인 userprofile은 유저생성시 custom_create를 사용해서 입력 받을수 있다.
+    def create(self, validated_data):
+        # object를 생성할때 다른 데이터가 입력되는 것을 방지하기 위해 미리 pop 해준다.
+        user_profile = validated_data.pop('userprofile')
+        get_hobbys = user_profile.pop("get_hobbys", [])
+
+        # User object 생성
+        user = UserModel(**validated_data)
+        user.save()
+
+        # UserProfile object 생성
+        user_profile = UserProfileModel.objects.create(user=user, **user_profile)
+        
+        # hobby 등록
+        user_profile.hobby.add(*get_hobbys)
+        user_profile.save()
     class Meta:
         model = UserModel
         # password 가 추가되어야 하는 이유는 create, update 시 validation 을 제공하기 위함이다. 
@@ -74,6 +94,8 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password':{'write_only':True}, # write_only : 데이터를 쓰거나 생성하거나 검증할때만 사용한다.
         }
+
+
 
 class CategorySerializer(serializers.ModelSerializer):
     
