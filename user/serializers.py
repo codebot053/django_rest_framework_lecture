@@ -76,6 +76,7 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # object를 생성할때 다른 데이터가 입력되는 것을 방지하기 위해 미리 pop 해준다.
         user_profile = validated_data.pop('userprofile')
+        # pop으로 가져오고 만약 "get_hobbys" 가 없으면 빈 리스트로 준다.
         get_hobbys = user_profile.pop("get_hobbys", [])
         # 비밀번호 암호화
         validated_data["password"] = make_password(validated_data['password'])

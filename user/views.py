@@ -86,7 +86,7 @@ class UserSignupApiView(APIView):
         if user_serializer.is_valid():
             # user_serializer.create() (X)
             # user_serializer.save() (O)
-            
+
             # 왜 create() 가 아니고 save() 인지 알아보자!!
             user_serializer.save()
             return Response(user_serializer.data,status=status.HTTP_200_OK)
