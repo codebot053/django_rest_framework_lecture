@@ -97,7 +97,7 @@ class UserSerializer(serializers.ModelSerializer):
         # password 는 Postman에서 API 로 노출되면 안되기에 read_only 처리를 해준다.
         # fields = "__all__" 의 경우 전체 query를 불러올 수 있지만
         # 필요없는 데이터들이 많아 자주 사용하지는 않는다.
-        fields = ['username', 'email', 'join_date', 'password', 'fullname', 'userprofile']
+        fields = ['user', 'email', 'join_date', 'password', 'fullname', 'userprofile']
 
         # 아래는 password 밑 다른 필드를 추가 처리하는 extra_kwargs 이다.
         extra_kwargs = {
@@ -115,7 +115,22 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class MyArticleSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(many=True)
+    category = CategorySerializer(many=True, required=False, read_only=True)
+    
+    
+    def create(self, validated_data):
+        
+
+        
+        
+        get_categorys = validated_data.pop("get_categorys",[])
+        article = ArticleModel.objects.create(**validated_data)
+        
+        
+        
+        
+        article.save()
+        return article
     class Meta:
         model = ArticleModel
-        fields = ['name', 'category', 'content']
+        fields = ['user' ,'category', 'content']

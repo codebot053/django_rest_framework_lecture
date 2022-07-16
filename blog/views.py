@@ -24,8 +24,12 @@ class ArticleApiView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self,request):
-        username = request.data.get('username', '')
-        password = request.data.get('password', '')
+        userinfo = request.data.get('user')
+        username = userinfo.get('username', '')
+        password = userinfo.get('password', '')
+        user_name=request.data["user"]["username"]
+        request.data["user"] = User.objects.get(username=user_name).id
+        print(request.data)
         user = authenticate(request, username=username, password=password)
 
         if not user:
@@ -35,18 +39,27 @@ class ArticleApiView(APIView):
         # TypeError: can’t compare offset-naive and offset-aware datetimes 
         # https://thewebdev.info/2022/04/04/how-to-fix-typeerror-cant-compare-offset-naive-and-offset-aware-datetimes-with-python/
         # 참조
-        
+        current_user_id = request.user.id
         current_user_join_date = request.user.join_date
         now_date_time = datetime.now(timezone.utc)
         three_minutes_limit = now_date_time - timedelta(minutes=3)
         
         if current_user_join_date <= three_minutes_limit:
             auth_to_write = True
-            return Response({'현재 시간': now_date_time,
+            article_serializer = MyArticleSerializer(data=request.data)
+             #print(article_serializer.initial_data)
+            if article_serializer.is_valid():
+                article_serializer.save()
+                return Response({'현재 시간': now_date_time,
                         '3분 전' : three_minutes_limit,
                         '유저 가입시간': current_user_join_date,
-                        '작성가능':auth_to_write},status=status.HTTP_200_OK)
+                        '작성가능':auth_to_write,
+                        '작성글':article_serializer.data},status=status.HTTP_200_OK)
+            else:
+
+                return Response(article_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
         auth_to_write = False
+        
         return Response({
                         '현재 시간': now_date_time,
                         '3분 전' : three_minutes_limit,
