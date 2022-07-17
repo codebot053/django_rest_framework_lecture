@@ -116,21 +116,25 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class MyArticleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(many=True, required=False, read_only=True)
-    
+    get_category = serializers.ListField(required=False)
     
     def create(self, validated_data):
-        
-
-        
-        
-        get_categorys = validated_data.pop("get_categorys",[])
+        get_category = validated_data.pop("get_category",[])
+        print(get_category)
+        # get_categorys = validated_data.pop("get_categorys",[])
+        #  article = ArticleModel(**validated_data)
         article = ArticleModel.objects.create(**validated_data)
+        # 아래 category 는 article 과 M2M 관계로 맺어진 Field 이며 article이 
+        # DB에 저장되기 전에 M2M 관계를 맺을수 없다. 
+        # 우선 category 를 제외한 정보를 저장하고 추가로 category를 add 해서 저장하면 
+        # article에 category 까지 등록 완료.
+        article.category.add(*get_category)
         
-        
-        
-        
+        # pop_hobbys = validated_data.pop("get_hobbys")
+        # print(*pop_hobbys)
         article.save()
+        
         return article
     class Meta:
         model = ArticleModel
-        fields = ['user' ,'category', 'content']
+        fields = ['user','name' ,'category', 'content','get_category']

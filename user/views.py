@@ -89,7 +89,7 @@ class UserSignupApiView(APIView):
 
             # 왜 create() 가 아니고 save() 인지 알아보자!!
             user_serializer.save()
-            return Response(user_serializer.data,status=status.HTTP_200_OK)
+            return Response(user_serializer.data,status=status.HTTP_201_CREATED)
         
 
         return Response(user_serializer.errors,status=status.HTTP_400_BAD_REQUEST)

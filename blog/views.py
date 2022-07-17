@@ -41,6 +41,9 @@ class ArticleApiView(APIView):
         # 참조
         current_user_id = request.user.id
         current_user_join_date = request.user.join_date
+        # offset-naive to offset-aware 
+        # datetime.now() : offset-naive
+        # datetime.now(timezone.utc) : offset-aware
         now_date_time = datetime.now(timezone.utc)
         three_minutes_limit = now_date_time - timedelta(minutes=3)
         
@@ -54,7 +57,7 @@ class ArticleApiView(APIView):
                         '3분 전' : three_minutes_limit,
                         '유저 가입시간': current_user_join_date,
                         '작성가능':auth_to_write,
-                        '작성글':article_serializer.data},status=status.HTTP_200_OK)
+                        '작성글':article_serializer.data},status=status.HTTP_201_CREATED)
             else:
 
                 return Response(article_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
