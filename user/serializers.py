@@ -119,7 +119,10 @@ class MyArticleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(many=True, required=False, read_only=True)
     # custom error message 를 extra_kwargs에서 작성시 적용되지 않아
     # 여기에서 설정.
-    get_category = serializers.ListField(error_messages={'required': '글 카테고리를 지정해주세요.'}
+    # 모델에는 없는 필드이지만 API를 받는 용도로 serializer에 생성한 필드의 경우
+    # 필드 자체에 'write_only=True'를 주어서 읽진 않지만 받을수 있도록
+    # 그리고 API 에서 들어오지 않을경우 error massage를 넘겨줄수 있도록 한다.
+    get_category = serializers.ListField(write_only=True, error_messages={'required': '글 카테고리를 지정해주세요.'}
     )
     
     def create(self, validated_data):
