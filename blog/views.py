@@ -50,7 +50,10 @@ class ArticleApiView(APIView):
         if current_user_join_date <= three_minutes_limit:
             auth_to_write = True
             article_serializer = MyArticleSerializer(data=request.data)
-             #print(article_serializer.initial_data)
+            # print(article_serializer.initial_data)
+            # 조건문을 쓰지않고 
+            # article_serializer.is_valid(raise_exception=True)
+            # 를 사용하면 validate 실패시 .is_valid 를 넘어가지 않고 exception을 띄어준다.
             if article_serializer.is_valid():
                 article_serializer.save()
                 return Response({'현재 시간': now_date_time,
