@@ -1,3 +1,4 @@
+from pkg_resources import require
 from rest_framework import serializers
 # password 해싱 모듈
 from django.contrib.auth.hashers import make_password
@@ -116,7 +117,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class MyArticleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(many=True, required=False, read_only=True)
-    get_category = serializers.ListField(required=False)
+    get_category = serializers.ListField()
     
     def create(self, validated_data):
         get_category = validated_data.pop("get_category",[])
@@ -138,3 +139,29 @@ class MyArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArticleModel
         fields = ['user','name' ,'category', 'content','get_category']
+        extra_kwargs = {
+            'name':{
+                # custom validator 속성이며 에러 발생시 각 error에
+                # 해당하는 error message 들을 지정해줄수 있습니다.
+                'error_messages':{
+                    # 필드값을 받지 않았을 경우
+                    'required' : '글 제목을 입력해주세요.'
+                    },
+            # 기본적으로 받아야 하는 필드값일 경우 아래 속성을 작성하지 
+            # 않아도 True 이지만
+            # 만약 해당 필드를 받지 않아도 되게 설정할경우 'False'로
+            # 지정하여야 합니다.
+            'required': True
+
+            },
+            'content':{
+                'error_messages':{
+                    'required': '글 본문내용을 입력해주세요.'
+                }
+            },
+            'get_category':{
+                'error_messages':{
+                    'required': '글 카테고리를 지정해주세요.'
+                }
+            }
+        }
