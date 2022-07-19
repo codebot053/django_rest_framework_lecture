@@ -6,9 +6,14 @@ from rest_framework.response import Response
 
 from rest_framework import permissions, status
 
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
 from django.db.models import F, Sum, Count, Case, When
 from django.contrib.auth import authenticate, login
 from django.conf import settings
+from django.contrib.auth.hashers import check_password
+
+
 # serializer
 from user.serializers import UserSerializer, MyArticleSerializer
 # user models
@@ -17,8 +22,49 @@ from user.models import User, UserProfile, Hobby
 from blog.models import Article, Category
 # # Create your views here. 
 
-class UserApiView(APIView):
+class UserLoginView(APIView):
+    permission_classes = [permissions.AllowAny]
     # 로그인
+    def post(self, request):
+        username = request.data['username']
+        password = request.data['password']
+
+        user = User.objects.filter(username=username).first()
+
+        if user is None: # 해당 email의 user가 존재하지 않는 경우
+            return Response(
+                {"message": "존재하지않는 user입니다."}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not check_password(password, user.password): # 비밀번호에서 틀린 경우
+            return Response(
+                {"message": "비밀번호가 틀렸습니다."}, status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if user is not None: # 모두 성공 시
+            token = TokenObtainPairSerializer.get_token(user)
+            refresh_token = str(token)
+            access_token = str(token.access_token)
+            response = Response(
+                {
+                    "user": UserSerializer(user).data,
+                    "message": "login success",
+                    "jwt_token": {
+                        "access_token": access_token,
+                        "refresh_token": refresh_token,
+                    },
+                },
+                status=status.HTTP_200_OK
+            )
+            response.set_cookie("access_token", access_token, httponly=True)
+            response.set_cookie("refresh_token", refresh_token, httponly=True)
+            return response
+        else: # 그 외
+            return Response(
+                {"message": "로그인에 실패하였습니다"}, status=status.HTTP_400_BAD_REQUEST
+            )
+class UserApiView(APIView):
+    # 회원가입
     permission_classes = [permissions.AllowAny]
     
     def get(self,request):
