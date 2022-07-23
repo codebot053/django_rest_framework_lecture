@@ -168,7 +168,7 @@ class LoginUserTokenAuthApi(APIView):
             response.set_cookie('refresh_token', request.COOKIES['refresh_token'])
             return response
 
-        # 토큰 만료시 토큰 갱신
+        # JWT 만료시 토큰 갱신
         except(jwt.exceptions.ExpiredSignatureError):
             print(0)
             try:
