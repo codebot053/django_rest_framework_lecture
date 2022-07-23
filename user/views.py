@@ -13,13 +13,17 @@ from django.contrib.auth import authenticate, login
 from django.conf import settings
 from django.contrib.auth.hashers import check_password
 
-
 # serializer
 from user.serializers import UserSerializer, MyArticleSerializer
 # user models
 from user.models import User, UserProfile, Hobby
 # blog models
 from blog.models import Article, Category
+import jwt
+from django_drf.settings import SIMPLE_JWT
+from django.contrib.auth import get_user
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+import rest_framework_simplejwt
 # # Create your views here. 
 
 class UserLoginView(APIView):
@@ -139,3 +143,56 @@ class UserSignupApiView(APIView):
         
 
         return Response(user_serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+# JWT 갱신 확인용 API뷰
+class LoginUserTokenAuthApi(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self,request):
+       
+        try:
+            print(0)
+            access_token = request.COOKIES['access_token']
+            
+            #payload = jwt.decode(access_token, env('DJANGO_SECRET_KEY'), algorithms=['HS256'])
+            payload = jwt.decode(access_token, SIMPLE_JWT['SIGNING_KEY'], algorithms=[SIMPLE_JWT['ALGORITHM']])
+            print(access_token)
+            pk = payload.get('user_id')
+            user = User.objects.get(id=pk)
+            serializer = UserSerializer(user)
+            response = Response(
+                serializer.data,
+                status=status.HTTP_200_OK
+            )
+            response.set_cookie('access_token', access_token)
+            response.set_cookie('refresh_token', request.COOKIES['refresh_token'])
+            return response
+
+        # 토큰 만료시 토큰 갱신
+        except(jwt.exceptions.ExpiredSignatureError):
+            print(0)
+            try:
+                # access 토큰 만료시
+                serializer = TokenRefreshSerializer(data={'refresh': request.COOKIES.get('refresh_token', None)})
+
+                if serializer.is_valid(raise_exception=True):
+                    access_token = serializer.validated_data['access']
+                    refresh_token = request.COOKIES.get('refresh_token', None)
+                    # payload = jwt.decode(access_token, env('DJANGO_SECRET_KEY'), algorithms=['HS256'])
+                    payload = jwt.decode(access_token, SIMPLE_JWT['SIGNING_KEY'], algorithms=[SIMPLE_JWT['ALGORITHM']])
+                    pk = payload.get('user_id')
+                    # user = get_user(pk)
+                    user = User.objects.get(id=pk)
+                    serializer = UserSerializer(instance=user)
+                    response = Response(serializer.data, status=status.HTTP_200_OK)
+                    response.set_cookie('access_token', access_token)
+                    response.set_cookie('refresh_token', refresh_token)
+                    return response
+            except(rest_framework_simplejwt.exceptions.TokenError): # refresh 토큰까지 만료 시
+                print(0)
+                return Response({"message": "로그인이 만료되었습니다."}, status=status.HTTP_200_OK)
+
+            raise jwt.exceptions.InvalidTokenError
+
+        except(jwt.exceptions.InvalidTokenError): # 토큰 invalid 인 모든 경우
+            return Response({"message": "로그인이 만료되었습니다."}, status=status.HTTP_200_OK)
