@@ -1,3 +1,4 @@
+from pkg_resources import require
 from rest_framework import serializers
 # password 해싱 모듈
 from django.contrib.auth.hashers import make_password
@@ -116,7 +117,13 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class MyArticleSerializer(serializers.ModelSerializer):
     category = CategorySerializer(many=True, required=False, read_only=True)
-    get_category = serializers.ListField(required=False)
+    # custom error message 를 extra_kwargs에서 작성시 적용되지 않아
+    # 여기에서 설정.
+    # 모델에는 없는 필드이지만 API를 받는 용도로 serializer에 생성한 필드의 경우
+    # 필드 자체에 'write_only=True'를 주어서 읽진 않지만 받을수 있도록
+    # 그리고 API 에서 들어오지 않을경우 error massage를 넘겨줄수 있도록 한다.
+    get_category = serializers.ListField(write_only=True, error_messages={'required': '글 카테고리를 지정해주세요.'}
+    )
     
     def create(self, validated_data):
         get_category = validated_data.pop("get_category",[])
@@ -138,3 +145,31 @@ class MyArticleSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArticleModel
         fields = ['user','name' ,'category', 'content','get_category']
+        extra_kwargs = {
+            'name':{
+                # custom validator 속성이며 에러 발생시 각 error에
+                # 해당하는 error message 들을 지정해줄수 있습니다.
+                'error_messages':{
+                    # 필드값을 받지 않았을 경우
+                    'required' : '글 제목을 입력해주세요.'
+                    },
+            
+            # 만약 해당 필드를 받지 않아도 되게 설정할경우 따로 아래 속성을
+            # 작성하지 않아도 됩니다. default값 False
+            'required': True
+
+            },
+            'content':{
+                'error_messages':{
+                    'required': '글 본문내용을 입력해주세요.'
+                },
+                'required': True
+            }
+            # ,
+            # 'get_category':{
+            #     'error_messages':{
+            #         'required': '글 카테고리를 지정해주세요.'
+            #     },
+            #     'required': True
+            # }
+        }
