@@ -13,6 +13,10 @@ import os, json
 from pathlib import Path
 import datetime
 from django.core.exceptions import ImproperlyConfigured
+
+# from rest_framework_simplejwt.views import TokenRefreshView
+#above package accur AppRegistryNotReady("Apps aren't loaded yet.")
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -81,12 +85,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    # simpleJWT
+    'rest_framework_simplejwt',
     # Apps
     'test_app_0.apps.TestApp0Config',
     'user',
     'blog',
     # # DRF Authentication 이용
     # 'rest_framework.authtoken',
+
     # 'rest_auth',
     # # 회원가입
     # 'django.contrib.sites',
